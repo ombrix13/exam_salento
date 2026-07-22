@@ -85,7 +85,6 @@ dev.off()
 <p align="center">
 <img src="img/false_color_comparison.png" width="700" >
 </p>
-
 By combining Short-Wave Unfrared (red), Near-Infrared (green), and Red bands (blue) into an RGB composite, surface properties that are invisible in natural color -vegetation vigor, moisture, burn scars — become clearly separable. In the post-fire image, bright scarred areas clearly state the extent of fire destruction and soil exposure.
 
 </details>
