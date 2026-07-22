@@ -32,7 +32,7 @@ The selected study area encompasses forested regions of New South Wales, Austral
 
 ## 3. Methodology & R Setup
 
-### 3.1 R Libraries Loading & Directory Setup
+### 3.1 R Libraries Loading, directory setup and importing of satellite bands
 
 ```r
 # 1. LOADING NECESSARY LIBRARIES 
@@ -60,18 +60,28 @@ post <- c(b4_post, b8_post, b12_post)
 names(post) <- c("B04", "B08", "B12")
 ```
 
-3.2 False Color RGB CompositeBy combining Band 12 (SWIR2), Band 8 (NIR), and Band 4 (Red), false-color composite images highlight moisture loss and soil exposure:
+3.2 False Color RGB composite images highlight moisture loss and soil exposure: by combining Band 12 (SWIR2), Band 8 (NIR), and Band 4 (Red):
 ```r
-# Visual of bands in False Color (B12 = SWIR2, B08 = NIR, B04 = RED)
+# Visual of bands in False Color
 par(mfrow = c(1, 2))
 plotRGB(pre, r = 3, g = 2, b = 1, stretch = "lin", main = "Pre-Fire False Color (Nov 2019)")
 plotRGB(post, r = 3, g = 2, b = 1, stretch = "lin", main = "Post-Fire False Color (Mar 2020)")
 dev.off()
 ```
-Comment: The Pre-Fire image displays healthy vegetation canopy in dense foliage tones. In the Post-Fire composite, bright scarred areas clearly demarcate the extent of fire destruction and soil exposure.
+![False Color RGB ](img/false_color_comparison.png)
 
-4. Spectral Indices Computation4.1 Normalized Burn Ratio (NBR) & Burn Severity ($\text{dNBR}$)The Normalized Burn Ratio uses Near-Infrared ($\text{NIR}$) and Short-Wave Infrared ($\text{SWIR2}$) bands:$$\text{NBR} = \frac{\text{NIR} - \text{SWIR2}}{\text{NIR} + \text{SWIR2}}$$$$\text{dNBR} = \text{NBR}_{\text{Pre}} - \text{NBR}_{\text{Post}}$$R# NBR (Normalized Burn Ratio): (NIR - SWIR2) / (NIR + SWIR2) -> Highlights burned areas
-```r
+Comment: The Pre-fire image displays healthy vegetation canopy in dense foliage tones. In the Post-Fire composite, bright scarred areas clearly demarcate the extent of fire destruction and soil exposure.
+
+4. Spectral Indices Computation
+   
+4.1 Normalized Burn Ratio (NBR) & Burn Severity
+
+The Normalized Burn Ratio uses Near-Infrared (NIR) and Short-Wave Infrared (SWIR2) bands:
+
+$$NBR = \frac{NIR - SWIR2}{NIR + SWIR2}$$
+
+$$dNBR = NBR_{Pre} - NBR_{Post}$$
+```r 
 nbr_pre  <- (pre[["B08"]] - pre[["B12"]]) / (pre[["B08"]] + pre[["B12"]])
 nbr_post <- (post[["B08"]] - post[["B12"]]) / (post[["B08"]] + post[["B12"]])
 dnbr     <- nbr_pre - nbr_post
@@ -82,7 +92,20 @@ plot(nbr_post, main = "NBR Post-Fire", col = viridis(100))
 dev.off()
 
 plot(dnbr, main = "dNBR (Burn Severity)", col = inferno(100))
-Comment: High positive values in $\text{dNBR}$ (bright yellow/orange regions in the inferno palette) directly locate zones of high burn severity where vegetation canopy was consumed by fire.4.2 Difference Vegetation Index (DVI)The Difference Vegetation Index evaluates absolute vegetative biomass without normalization:$$\text{DVI} = \text{NIR} - \text{RED}$$$$\Delta\text{DVI} = \text{DVI}_{\text{Pre}} - \text{DVI}_{\text{Post}}$$R# DVI (Difference Vegetation Index): NIR - RED (absolute vegetation biomass quantity)
+```
+![NBR Pre/Post-fire](img/nbr_analysis.png)
+![NBR difference](img/nbr_analysis_difference.png)
+
+Comment: High positive values in $\text{dNBR}$ (bright yellow/orange regions in the inferno palette) directly locate zones of high burn severity where vegetation canopy was consumed by fire.
+
+4.2 Difference Vegetation Index (DVI)
+
+The Difference Vegetation Index evaluates absolute vegetative biomass without normalization:
+$$DVI = NIR - RED$$
+
+$$\Delta DVI = DVI_{Pre} - DVI_{Post}$$
+
+```r
 dvi_pre  <- pre[["B08"]] - pre[["B04"]]
 dvi_post <- post[["B08"]] - post[["B04"]]
 ddvi     <- dvi_pre - dvi_post
@@ -93,7 +116,17 @@ plot(dvi_post, main = "DVI Post-Fire", col = viridis(100))
 dev.off()
 
 plot(ddvi, main = "ΔDVI", col = inferno(100))
-4.3 Normalized Difference Vegetation Index (NDVI)The NDVI measures photosynthetic vigor:$$\text{NDVI} = \frac{\text{NIR} - \text{RED}}{\text{NIR} + \text{RED}}$$$$\Delta\text{NDVI} = \text{NDVI}_{\text{Pre}} - \text{NDVI}_{\text{Post}}$$R# NDVI (Normalized Difference Vegetation Index): (NIR - RED) / (NIR + RED) (vegetation health status)
+```
+![DVI Pre/Post-fire](img/dvi_analysis.png)
+![DVI difference](img/dvi_analysis_difference.png)
+
+4.3 Normalized Difference Vegetation Index 
+
+The NDVI measures photosynthetic vigor:
+$$NDVI = \frac{NIR - RED}{NIR + RED}$$
+
+$$\Delta NDVI = NDVI_{Pre} - NDVI_{Post}$$
+```r
 ndvi_pre  <- (pre[["B08"]] - pre[["B04"]]) / (pre[["B08"]] + pre[["B04"]])
 ndvi_post <- (post[["B08"]] - post[["B04"]]) / (post[["B08"]] + post[["B04"]])
 dndvi     <- ndvi_pre - ndvi_post
@@ -104,11 +137,16 @@ plot(ndvi_post, main = "NDVI Post-Fire", col = viridis(100))
 dev.off()
 
 plot(dndvi, main = "ΔNDVI", col = inferno(100))
-5. Land Cover Classification & Statistical QuantificationTo isolate land surface dynamics from water bodies or clouds, a threshold reclassification matrix was applied:$\text{NDVI} < 0.1 \rightarrow \text{NA}$ (Excludes water/ocean bodies and non-land pixels)$0.1 \le \text{NDVI} \le 0.55 \rightarrow \mathbf{0}$ (Burned Area / Bare Soil / Low Vigor Vegetation - Purple)$\text{NDVI} > 0.55 \rightarrow \mathbf{1}$ (Healthy Forest / Dense Vegetation Canopy - Light Green)R# Threshold matrix definition for NDVI classification:
-# < 0.1       = NA (Masks out ocean/clouds)
-# 0.1 - 0.55  = 0  (Burned/Bare Soil/Low Vegetation)
-# > 0.55      = 1  (Healthy Forest/Dense Vegetation)
+```
+![NDVI Pre/Post-fire](img/ndvi_analysis.png)
+![NDVI difference](img/ndvi_analysis_difference.png)
 
+5. Land Cover Classification & Statistical QuantificationTo isolate land surface dynamics from water bodies or clouds, a threshold reclassification matrix was applied:
+* $NDVI < 0.1 \rightarrow NA$ (Excludes water/ocean bodies and non-land pixels)
+* $0.1 \le NDVI \le 0.55 \rightarrow \mathbf{0}$ (Burned Area / Bare Soil / Low Vigor Vegetation - **Purple**)
+* $NDVI > 0.55 \rightarrow \mathbf{1}$ (Healthy Forest / Dense Vegetation Canopy - **Light Green**)
+
+```r
 soglia_water <- 0.1
 soglia_veg   <- 0.55
 
@@ -125,6 +163,9 @@ par(mfrow = c(1, 2))
 plot(classi_pre, main = "NDVI Classes Pre-Fire", col = c("purple", "lightgreen"))
 plot(classi_post, main = "NDVI Classes Post-Fire", col = c("purple", "lightgreen"))
 dev.off()
+```
+![NDVI Classified maps](img/classified_maps.png)
+```r
 
 # Frequency calculation
 freq_pre  <- freq(classi_pre)
@@ -156,7 +197,18 @@ summary_table <- data.frame(
 )
 
 print(summary_table)
-6. Statistical Results & VisualizationA comparative bar chart was built using ggplot2 to evaluate changes in land cover class percentages:R# COMPARATIVE BAR CHART WITH GGPLOT2
+```
+### Summary Table (Land Cover Percentages)
+
+| Class | Pre-Fire (%) | Post-Fire (%) |
+| :--- | :---: | :---: |
+| **Burned / Bare Soil** | 1.85 | 45.54 |
+| **Healthy Vegetation** | 98.15 | 54.46 |
+
+
+6. Statistical Results & VisualizationA comparative bar chart was built using ggplot2 to evaluate changes in land cover class percentages:
+```r
+ #COMPARATIVE BAR CHART WITH GGPLOT2
 
 df_long <- melt(summary_table, id.vars = "Class", 
                 variable.name = "Period", 
@@ -174,4 +226,10 @@ ggplot(df_long, aes(x = Class, y = Percentage, fill = Period)) +
        subtitle = "Percentage comparison of vegetation cover before and after the fires", 
        y = "Percentage (%)", x = "Class") + 
   theme_minimal()
-7. ConclusionsThis geo-ecological analysis highlights the environmental impact of the 2019–2020 Australian "Black Summer" wildfires:Biomass Loss: Spectral indices ($\text{NDVI}$, $\text{DVI}$, and $\text{NBR}$) showed a significant drop in values across the study region post-fire.Burn Severity Mapping: The $\text{dNBR}$ differential raster precisely identified the spatial footprint and severity of burned forest zones.Quantitative Shift: Threshold classification confirmed a major decrease in healthy forest coverage alongside a proportional expansion of burned/bare ground.Using multi-spectral satellite observations and open-source tools in R allows for rapid damage quantification, proving essential for ecological monitoring and post-fire forest management strategies.
+```
+![Barchar](img/vegetation_dynamics_barchart.png)
+
+
+7. Conclusions
+This geo-ecological analysis highlights the environmental impact of the 2019–2020 Australian "Black Summer" wildfires:
+Biomass Loss: Spectral indices ($\text{NDVI}$, $\text{DVI}$, and $\text{NBR}$) showed a significant drop in values across the study region post-fire.Burn Severity Mapping: The $\text{dNBR}$ differential raster precisely identified the spatial footprint and severity of burned forest zones.Quantitative Shift: Threshold classification confirmed a major decrease in healthy forest coverage alongside a proportional expansion of burned/bare ground.Using multi-spectral satellite observations and open-source tools in R allows for rapid damage quantification, proving essential for ecological monitoring and post-fire forest management strategies.
