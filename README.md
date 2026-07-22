@@ -122,7 +122,7 @@ plot(dnbr, main = "ΔNBR (Burn Severity)", col = inferno(100))
 </p>
 
 
-High positive values in $\Delta\text{NBR}$ (bright yellow/orange regions) locate zones of high burn severity where vegetation canopy was consumed by fire.
+High positive values in $\Delta\text{NBR}$ (yellow and orange regions) locate zones of high burn severity where vegetation canopy was consumed by fire.
 
 ---
 
@@ -152,7 +152,7 @@ plot(ddvi, main = "ΔDVI", col = inferno(100))
 <img src="img/dvi_analysis_difference.png" width="700" >
 </p>
 
-High positive values in $\Delta\text{DVI}$ (bright yellow/orange regions) locate zones of severe biomass loss where the forest canopy was destroyed by fire.
+High positive values in $\Delta\text{DVI}$ (yellow and orange regions) locate zones of severe biomass loss where the forest canopy was destroyed by fire.
 
 ---
 
@@ -183,7 +183,7 @@ plot(dndvi, main = "ΔNDVI", col = inferno(100))
 <img src="img/ndvi_analysis_difference.png" width="700" >
 </p>
 
-High positive values in $\Delta\text{NDVI}$ (bright yellow/orange regions) locate zones of severe photosynthetic decline where vegetation health and canopy vigor were compromised by fire.
+High positive values in $\Delta\text{NDVI}$ (yellow and orange regions) locate zones of severe photosynthetic decline where vegetation health and canopy vigor were compromised by fire.
 
 ---
 
@@ -207,7 +207,7 @@ The pre-fire histogram shows a dense cluster of high NDVI values concentrated be
 ### Classification  
 A threshold classification matrix was applied to enable an exact comparison of surviving and destroyed vegetation and also to isolate land surface dynamics from water bodies or clouds:
   
-* $NDVI < 0.1 \rightarrow NA$ (Excludes water/ocean bodies and non-land pixels)
+* $NDVI < 0.1 \rightarrow NA$ (Excludes water bodies and non-land pixels)
 * $0.1 \le NDVI \le 0.55 \rightarrow \mathbf{0}$ (Burned Area / Bare Soil / Low Vigor Vegetation - **Purple**)
 * $NDVI > 0.55 \rightarrow \mathbf{1}$ (Healthy Forest / Dense Vegetation Canopy - **Light Green**)
 
@@ -282,8 +282,7 @@ ggplot(df_long, aes(x = Class, y = Percentage, fill = Period)) +
   scale_fill_manual(values = c("Pre_Fire" = "lightblue", 
                                "Post_Fire" = "orange")) + 
   ylim(0, 100) + 
-  labs(title = "Land Surface Vegetation Dynamics (Australian Black Summer)", 
-       subtitle = "Percentage comparison of vegetation cover before and after the fires", 
+  labs(title = "Comparison of vegetation cover before and after the fires", 
        y = "Percentage (%)", x = "Class") + 
   theme_minimal()
 ```
