@@ -244,29 +244,15 @@ Pixel counts and percentages for each class were computed, to provide *a quantit
 freq_pre  <- freq(classi_pre)
 freq_post <- freq(classi_post)
 
-# Extract pixel counts safely
-count_pre_veg  <- ifelse(1 %in% freq_pre$value, freq_pre[freq_pre$value == 1, "count"], 0)
-count_pre_burn <- ifelse(0 %in% freq_pre$value, freq_pre[freq_pre$value == 0, "count"], 0)
+perc_pre <-freq_pre$count *100/ncell(classi_pre)
+perc_post <-freq_post$count*100/ncell(classi_post)
 
-count_post_veg  <- ifelse(1 %in% freq_post$value, freq_post[freq_post$value == 1, "count"], 0)
-count_post_burn <- ifelse(0 %in% freq_post$value, freq_post[freq_post$value == 0, "count"], 0)
 
-# Total land surface pixels
-tot_land_pre  <- count_pre_veg + count_pre_burn
-tot_land_post <- count_post_veg + count_post_burn
-
-# Percentages
-perc_pre_veg  <- (count_pre_veg / tot_land_pre) * 100
-perc_pre_burn <- (count_pre_burn / tot_land_pre) * 100
-
-perc_post_veg  <- (count_post_veg / tot_land_post) * 100
-perc_post_burn <- (count_post_burn / tot_land_post) * 100
-
-# Summary Data Frame
+#Summary Data Frame
 summary_table <- data.frame(
   Class        = c("Burned / Bare Soil", "Healthy Vegetation"),
-  Pre_Fire     = round(c(perc_pre_burn, perc_pre_veg), 2),
-  Post_Fire    = round(c(perc_post_burn, perc_post_veg), 2)
+  Pre_Fire     = round(perc_pre , 2),
+  Post_Fire    = round(perc_post, 2)
 )
 
 print(summary_table)
