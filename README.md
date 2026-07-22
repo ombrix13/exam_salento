@@ -302,7 +302,7 @@ ggplot(df_long, aes(x = Class, y = Percentage, fill = Period)) +
   theme_minimal()
 ```
 <p align="center">
-<img src="img/vegetation_dynamics_barchart.png" width="700" >
+<img src="img/vegetation.png" width="700" >
 </p>
 
 </details>
