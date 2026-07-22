@@ -135,10 +135,15 @@ par(mfrow = c(1, 2))
 plot(ndvi_pre, main = "NDVI Pre-Fire", col = viridis(100))
 plot(ndvi_post, main = "NDVI Post-Fire", col = viridis(100))
 dev.off()
-
+#Comparative histogram of NDVI distribution
+par(mfrow = c(1, 2))
+hist(ndvi_pre, main = "NDVI Distribution Pre-Fire", col = "forestgreen", xlab = "NDVI")
+hist(ndvi_post, main = "NDVI Distribution Post-Fire", col = "firebrick", xlab = "NDVI")
+dev.off()
 plot(dndvi, main = "ΔNDVI", col = inferno(100))
 ```
 ![NDVI Pre/Post-fire](img/ndvi_analysis.png)
+![NDVI Pre/Post-fire distribution](img/ndvi_distribution.png)
 ![NDVI difference](img/ndvi_analysis_difference.png)
 
 5. Land Cover Classification & Statistical QuantificationTo isolate land surface dynamics from water bodies or clouds, a threshold reclassification matrix was applied:
