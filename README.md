@@ -20,7 +20,7 @@ To quantify canopy loss and assess burn severity, three spectral indices were ca
 
   
 These indices were used to assess the spatial extent and ecological severity of the fires. 
-* Each index was computed for both timeframes (November 2019 and March 2020) to capture baseline conditions and post-fire conditions.
+* Each index was computed for both timeframes to capture baseline conditions and post-fire conditions.
 * Differential rasters were derived to identified the precise spatial footprint of the fire scars.
 * $\text{NDVI}$ values were used to establish a threshold-based classification matrix to make a categorical separation of unburned healthy forest from severely burned or bare soil areas, allowing for a precise statistical quantification of the total impacted surface area.
 </details>
