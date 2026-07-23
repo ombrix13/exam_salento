@@ -1,14 +1,14 @@
 
 
-# ANALYSIS OF THE AUSTRALIAN "BLACK SUMMER" WILDFIRES (2019-2020) 
+#ANALYSIS OF THE AUSTRALIAN "BLACK SUMMER" WILDFIRES (2019-2020) 
 
-# LOADING NECESSARY LIBRARIES 
+#LOADING NECESSARY LIBRARIES 
 library(terra)      # For raster handling and satellite spatial data
 library(ggplot2)    # For statistical graphics and bar charts
 library(reshape2)   # For tabular data restructuring
 library(viridis)    # For scientific, colorblind-friendly palettes
 
-#SETTING WORKING DIRECTORY & IMPORTING RAW SATELLITE BANDS 
+#SETTING WORKING DIRECTORY, IMPORTING RAW SATELLITE BANDS 
 setwd("C:/Users/lenovo/Desktop/exam_R")
 
 #Import pre-fire/post-fire bands and combine single bands into a multi-layer raster object
@@ -35,16 +35,16 @@ plot(b8_post,main="Pre-fire B08")
 plot(b12_post,main="Pre-fire B12")
 
 
-#Visual of bands in False Color (B12 = SWIR2, B08 = NIR, B04 = RED)
+#Visuals of bands in False Color (B12 = SWIR2, B08 = NIR, B04 = RED)
 par(mfrow = c(1, 2))
 plotRGB(pre, r = 3, g = 2, b = 1, stretch = "lin", main = "Pre-Fire False Color (Nov 2019)")
 plotRGB(post, r = 3, g = 2, b = 1, stretch = "lin", main = "Post-Fire False Color (Mar 2020)")
 dev.off()
 
 
-#COMPUTING SPECTRAL VEGETATION AND BURN INDICES 
+#COMPUTING INDICES 
 
-#NBR (Normalized Burn Ratio): (NIR - SWIR2) / (NIR + SWIR2) -> Highlights burned areas
+#NBR: (NIR - SWIR2) / (NIR + SWIR2) (highlights burned areas)
 nbr_pre  <- (pre[["B08"]] - pre[["B12"]]) / (pre[["B08"]] + pre[["B12"]])
 nbr_post <- (post[["B08"]] - post[["B12"]]) / (post[["B08"]] + post[["B12"]])
 dnbr     <- nbr_pre - nbr_post
@@ -56,7 +56,7 @@ dev.off()
 plot(dnbr, main = "ΔNBR", col = inferno(100))
 
 
-#DVI (Difference Vegetation Index): NIR - RED  (absolute vegetation biomass quantity)
+#DVI: NIR - RED  (absolute vegetation biomass quantity)
 dvi_pre  <- pre[["B08"]] - pre[["B04"]]
 dvi_post <- post[["B08"]] - post[["B04"]]
 ddvi     <- dvi_pre - dvi_post
@@ -69,7 +69,7 @@ dev.off()
 plot(ddvi, main = "ΔDVI", col = inferno(100))
 
 
-#NDVI (Normalized Difference Vegetation Index):(NIR - RED) / (NIR + RED) (vegetation health status)
+#NDVI:(NIR - RED) / (NIR + RED) (vegetation health status)
 ndvi_pre  <- (pre[["B08"]] - pre[["B04"]]) / (pre[["B08"]] + pre[["B04"]])
 ndvi_post <- (post[["B08"]] - post[["B04"]]) / (post[["B08"]] + post[["B04"]])
 dndvi     <- ndvi_pre - ndvi_post
@@ -80,14 +80,18 @@ plot(ndvi_post, main = "NDVI Post-Fire", col = viridis(100))
 dev.off()
 plot(dndvi, main = "ΔNDVI", col = inferno(100))
 
-
+# Istogram 
+par(mfrow = c(1, 2))
+hist(ndvi_pre, main = "NDVI Distribution Pre-Fire", col = "lightgreen", xlab = "NDVI")
+hist(ndvi_post, main = "NDVI Distribution Post-Fire", col = "purple", xlab = "NDVI")
+dev.off()
 
 #LAND COVER CLASSIFICATION AND PERCENTAGE QUANTIFICATION 
 
 #Threshold matrix definition for NDVI classification:
 # < 0.1       = NA (Masks out ocean/clouds)
-# 0.1 - 0.55  = 0  (Burned/Bare Soil/Low Vegetation)
-# > 0.55      = 1  (Healthy Forest/Dense Vegetation)
+# 0.1 - 0.55  = 0  (Burned/Bare soil)
+# > 0.55      = 1  (Healthy vegetation)
 
 soglia_water <- 0.1
 soglia_veg   <- 0.55
@@ -100,7 +104,7 @@ reclass_matrix <- matrix(c(-Inf, soglia_water, NA,
 classi_pre  <- classify(ndvi_pre, reclass_matrix)
 classi_post <- classify(ndvi_post, reclass_matrix)
 
-# Visualizing classified maps
+
 par(mfrow = c(1, 2))
 plot(classi_pre, main = "NDVI Classes Pre-Fire", col = c("purple", "lightgreen"))
 plot(classi_post, main = "NDVI Classes Post-Fire", col = c("purple", "lightgreen"))
@@ -115,7 +119,6 @@ perc_pre <-freq_pre$count *100/ncell(classi_pre)
 perc_post <-freq_post$count*100/ncell(classi_post)
 
 
-
 #Summary Data Frame
 summary_table <- data.frame(
   Class        = c("Burned / Bare Soil", "Healthy Vegetation"),
@@ -124,11 +127,8 @@ summary_table <- data.frame(
 )
 
 print(summary_table)
-# Istogram 
-par(mfrow = c(1, 2))
-hist(ndvi_pre, main = "NDVI Distribution Pre-Fire", col = "lightgreen", xlab = "NDVI")
-hist(ndvi_post, main = "NDVI Distribution Post-Fire", col = "purple", xlab = "NDVI")
-dev.off()
+
+
 
 #COMPARATIVE BAR CHART WITH GGPLOT2 
 
